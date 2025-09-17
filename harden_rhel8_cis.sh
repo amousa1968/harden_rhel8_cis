@@ -438,24 +438,28 @@ sed -i 's/#PermitUserEnvironment no/PermitUserEnvironment no/' /etc/ssh/sshd_con
 sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 300/' /etc/ssh/sshd_config
 sed -i 's/#ClientAliveCountMax 3/ClientAliveCountMax 0/' /etc/ssh/sshd_config
 sed -i 's/#LoginGraceTime 2m/LoginGraceTime 60/' /etc/ssh/sshd_config
-echo "AllowUsers root" >> /etc/ssh/sshd_config  # Adjust as needed
-echo "DenyUsers bin daemon adm lp mail uucp operator games gopher ftp nobody vcsa rpc mailnull smmsp nscd rpcuser nfsnobody sshd" >> /etc/ssh/sshd_config
-echo "DenyGroups bin daemon adm lp mail uucp operator games gopher ftp nobody vcsa rpc mailnull smmsp nscd rpcuser nfsnobody sshd" >> /etc/ssh/sshd_config
+{
+echo "AllowUsers root"
+echo "DenyUsers bin daemon adm lp mail uucp operator games gopher ftp nobody vcsa rpc mailnull smmsp nscd rpcuser nfsnobody sshd"
+echo "DenyGroups bin daemon adm lp mail uucp operator games gopher ftp nobody vcsa rpc mailnull smmsp nscd rpcuser nfsnobody sshd"
+} >> /etc/ssh/sshd_config
 systemctl reload sshd
 
 # 5.3 Configure PAM
 echo "5.3 Configuring PAM..."
 yum install pam -y
 # 5.3.1 Ensure password creation requirements are configured
-echo "password requisite pam_pwquality.so try_first_pass local_users_only retry=3 authtok_type=" >> /etc/pam.d/system-auth
-echo "password sufficient pam_unix.so sha512 shadow nullok try_first_pass use_authtok" >> /etc/pam.d/system-auth
 # 5.3.2 Ensure lockout for failed password attempts is configured
-echo "auth required pam_faillock.so preauth audit silent deny=5 unlock_time=900" >> /etc/pam.d/system-auth
-echo "auth [success=1 default=bad] pam_unix.so" >> /etc/pam.d/system-auth
-echo "auth [default=die] pam_faillock.so authfail audit deny=5 unlock_time=900" >> /etc/pam.d/system-auth
-echo "auth sufficient pam_faillock.so authsucc audit deny=5 unlock_time=900" >> /etc/pam.d/system-auth
 # 5.3.3 Ensure password reuse is limited
-echo "password sufficient pam_unix.so remember=5" >> /etc/pam.d/system-auth
+{
+echo "password requisite pam_pwquality.so try_first_pass local_users_only retry=3 authtok_type="
+echo "password sufficient pam_unix.so sha512 shadow nullok try_first_pass use_authtok"
+echo "auth required pam_faillock.so preauth audit silent deny=5 unlock_time=900"
+echo "auth [success=1 default=bad] pam_unix.so"
+echo "auth [default=die] pam_faillock.so authfail audit deny=5 unlock_time=900"
+echo "auth sufficient pam_faillock.so authsucc audit deny=5 unlock_time=900"
+echo "password sufficient pam_unix.so remember=5"
+} >> /etc/pam.d/system-auth
 # 5.3.4 Ensure password hashing algorithm is SHA-512
 # Already configured
 
