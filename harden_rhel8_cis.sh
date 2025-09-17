@@ -71,14 +71,13 @@ echo "install vfat /bin/true" >> /etc/modprobe.d/vfat.conf
 set_mount_option() {
   local path=$1
   local option=$2
-  local description=$3
 
   if mount | grep -q "on ${path} "; then
     # Path is a separate mount point
-    mount -o remount,${option} "${path}" 2>/dev/null || echo "Warning: Could not remount ${path} with ${option}"
+    mount -o remount,"${option}" "${path}" 2>/dev/null || echo "Warning: Could not remount ${path} with ${option}"
   else
     # Path is not a separate mount point, apply to root filesystem
-    mount -o remount,${option} / 2>/dev/null || echo "Warning: Could not remount root filesystem with ${option} for ${path}"
+    mount -o remount,"${option}" / 2>/dev/null || echo "Warning: Could not remount root filesystem with ${option} for ${path}"
   fi
 }
 
