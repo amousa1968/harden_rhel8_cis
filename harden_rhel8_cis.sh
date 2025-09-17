@@ -44,20 +44,35 @@ echo "1.1.2 Configuring /tmp..."
 
 # 1.1.3 Ensure nodev option set on /tmp partition
 echo "1.1.3 Setting nodev on /tmp..."
-mount -o remount,nodev /tmp 2>/dev/null || echo "Warning: Could not remount /tmp with nodev"
-echo "/tmp /tmp tmpfs defaults,rw,nosuid,nodev,noexec,relatime 0 0" >> /etc/fstab
+if mount | grep -q "on /tmp "; then
+  mount -o remount,nodev /tmp 2>/dev/null || echo "Warning: Could not remount /tmp with nodev"
+else
+  echo "Info: /tmp is not a separate mount point, skipping remount"
+fi
 
 # 1.1.4 Ensure nosuid option set on /tmp partition
 echo "1.1.4 Setting nosuid on /tmp..."
-mount -o remount,nosuid /tmp 2>/dev/null || echo "Warning: Could not remount /tmp with nosuid"
+if mount | grep -q "on /tmp "; then
+  mount -o remount,nosuid /tmp 2>/dev/null || echo "Warning: Could not remount /tmp with nosuid"
+else
+  echo "Info: /tmp is not a separate mount point, skipping remount"
+fi
 
 # 1.1.5 Ensure noexec option set on /tmp partition
 echo "1.1.5 Setting noexec on /tmp..."
-mount -o remount,noexec /tmp 2>/dev/null || echo "Warning: Could not remount /tmp with noexec"
+if mount | grep -q "on /tmp "; then
+  mount -o remount,noexec /tmp 2>/dev/null || echo "Warning: Could not remount /tmp with noexec"
+else
+  echo "Info: /tmp is not a separate mount point, skipping remount"
+fi
 
 # 1.1.6 Ensure /dev/shm is configured
 echo "1.1.6 Configuring /dev/shm..."
-mount -o remount,nodev,nosuid,noexec /dev/shm 2>/dev/null || echo "Warning: Could not remount /dev/shm"
+if mount | grep -q "tmpfs on /dev/shm"; then
+  mount -o remount,nodev,nosuid,noexec /dev/shm 2>/dev/null || echo "Warning: Could not remount /dev/shm"
+else
+  echo "Info: /dev/shm is not tmpfs, skipping remount"
+fi
 
 # 1.1.7 Ensure nodev option set on /dev/shm partition
 # Already done above
@@ -76,15 +91,27 @@ echo "1.1.11 /var/tmp partition check - Manual check required"
 
 # 1.1.12 Ensure nodev option set on /var/tmp partition
 echo "1.1.12 Setting nodev on /var/tmp..."
-mount -o remount,nodev /var/tmp 2>/dev/null || echo "Warning: Could not remount /var/tmp with nodev"
+if mount | grep -q "on /var/tmp "; then
+  mount -o remount,nodev /var/tmp 2>/dev/null || echo "Warning: Could not remount /var/tmp with nodev"
+else
+  echo "Info: /var/tmp is not a separate mount point, skipping remount"
+fi
 
 # 1.1.13 Ensure nosuid option set on /var/tmp partition
 echo "1.1.13 Setting nosuid on /var/tmp..."
-mount -o remount,nosuid /var/tmp 2>/dev/null || echo "Warning: Could not remount /var/tmp with nosuid"
+if mount | grep -q "on /var/tmp "; then
+  mount -o remount,nosuid /var/tmp 2>/dev/null || echo "Warning: Could not remount /var/tmp with nosuid"
+else
+  echo "Info: /var/tmp is not a separate mount point, skipping remount"
+fi
 
 # 1.1.14 Ensure noexec option set on /var/tmp partition
 echo "1.1.14 Setting noexec on /var/tmp..."
-mount -o remount,noexec /var/tmp 2>/dev/null || echo "Warning: Could not remount /var/tmp with noexec"
+if mount | grep -q "on /var/tmp "; then
+  mount -o remount,noexec /var/tmp 2>/dev/null || echo "Warning: Could not remount /var/tmp with noexec"
+else
+  echo "Info: /var/tmp is not a separate mount point, skipping remount"
+fi
 
 # 1.1.15 Ensure separate partition exists for /var/log
 echo "1.1.15 /var/log partition check - Manual check required"
