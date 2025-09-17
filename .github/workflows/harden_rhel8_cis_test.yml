@@ -1,0 +1,29 @@
+name: Test RHEL8 CIS Hardening Scripts
+
+on:
+  push:
+    paths:
+      - 'harden_rhel8_cis-1/**'
+
+jobs:
+  test-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Run shellcheck on hardening script
+      run: shellcheck harden_rhel8_cis.sh
+
+    - name: Run shellcheck on test script
+      run: shellcheck test_hardening_script.sh
+
+    - name: Make hardening script executable
+      run: chmod +x harden_rhel8_cis.sh
+
+    - name: Make test script executable
+      run: chmod +x test_hardening_script.sh
+
+    - name: Run test script
+      run: ./test_hardening_script.sh
