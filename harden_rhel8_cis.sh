@@ -132,19 +132,33 @@ echo "install usb-storage /bin/true" >> /etc/modprobe.d/usb-storage.conf
 
 # 1.2 Configure Software Updates
 echo "1.2 Configuring software updates..."
-yum install dnf-automatic -y
-systemctl enable dnf-automatic.timer
-systemctl start dnf-automatic.timer
+if command -v yum > /dev/null 2>&1; then
+  yum install dnf-automatic -y
+  systemctl enable dnf-automatic.timer
+  systemctl start dnf-automatic.timer
+elif command -v apt > /dev/null 2>&1; then
+  apt update && apt install -y unattended-upgrades
+  systemctl enable unattended-upgrades
+  systemctl start unattended-upgrades
+fi
 
 # 1.3 Filesystem Integrity Checking
 echo "1.3 Installing AIDE..."
-yum install aide -y
+if command -v yum > /dev/null 2>&1; then
+  yum install aide -y
+elif command -v apt > /dev/null 2>&1; then
+  apt update && apt install -y aide
+fi
 aide --init
 mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
 
 # 1.4 Secure Boot Settings
 echo "1.4 Configuring secure boot..."
-grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg  # Adjust for BIOS if needed
+if command -v yum > /dev/null 2>&1; then
+  grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg  # Adjust for BIOS if needed
+elif command -v apt > /dev/null 2>&1; then
+  update-grub
+fi
 
 # 1.5 Additional Process Hardening
 echo "1.5 Process hardening..."
@@ -158,7 +172,11 @@ echo "kernel.randomize_va_space = 2" >> /etc/sysctl.conf
 sysctl -p
 
 # 1.5.3 Ensure prelink is disabled
-yum remove prelink -y
+if command -v yum > /dev/null 2>&1; then
+  yum remove prelink -y
+elif command -v apt > /dev/null 2>&1; then
+  apt remove -y prelink
+fi
 
 # 1.6 Mandatory Access Control
 echo "1.6 Configuring SELinux..."
@@ -178,7 +196,11 @@ echo "2 Services..."
 
 # 2.1 inetd Services
 echo "2.1 Disabling inetd services..."
-yum remove xinetd -y
+if command -v yum > /dev/null 2>&1; then
+  yum remove xinetd -y
+elif command -v apt > /dev/null 2>&1; then
+  apt remove -y xinetd
+fi
 
 # 2.2 Special Purpose Services
 echo "2.2 Disabling special purpose services..."
