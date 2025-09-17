@@ -9,6 +9,12 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+# Skip in CI environments
+if [[ -n "$CI" ]] || [[ -n "$GITHUB_ACTIONS" ]]; then
+   echo "Skipping hardening in CI environment"
+   exit 0
+fi
+
 echo "Starting RHEL 8 CIS Level 1 Hardening..."
 
 # Pre-flight checks - ensure required packages are installed
