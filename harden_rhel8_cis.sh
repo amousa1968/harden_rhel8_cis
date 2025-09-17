@@ -21,7 +21,7 @@ if ! command -v rpm >/dev/null 2>&1 && ! command -v yum >/dev/null 2>&1 && ! com
 fi
 
 # Install required packages
-REQUIRED_PACKAGES=("audit" "rsyslog" "logrotate" "firewalld" "pam" "openssh-server")
+REQUIRED_PACKAGES=("audit" "rsyslog" "logrotate" "firewalld" "pam" "openssh-server" "aide" "dnf-automatic")
 for package in "${REQUIRED_PACKAGES[@]}"; do
   if ! rpm -q "$package" >/dev/null 2>&1; then
     echo "Installing required package: $package"
