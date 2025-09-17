@@ -242,8 +242,7 @@ sysctl -p
 
 # 3.4 Uncommon Network Protocols
 echo "3.4 Disabling uncommon network protocols..."
-echo "install dccp /bin/true" >> /etc/modprobe.d/dccp.conf
-# Already done
+# dccp already disabled in 3.1
 
 # 3.5 Firewall Configuration
 echo "3.5 Configuring firewall..."
@@ -280,8 +279,10 @@ echo "4.1.4 Configuring system disable on full logs..."
 
 # 4.1.5 Ensure auditd collects login and logout events
 echo "4.1.5 Collecting login/logout events..."
-echo "-w /var/log/lastlog -p wa -k logins" >> /etc/audit/rules.d/audit.rules
-echo "-w /var/run/faillock -p wa -k logins" >> /etc/audit/rules.d/audit.rules
+{
+echo "-w /var/log/lastlog -p wa -k logins"
+echo "-w /var/run/faillock -p wa -k logins"
+} >> /etc/audit/rules.d/audit.rules
 
 # 4.1.6 Ensure auditd collects process and session initiation information
 echo "4.1.6 Collecting process/session info..."
@@ -293,13 +294,17 @@ echo "-w /var/log/btmp -p wa -k logins"
 
 # 4.1.7 Ensure auditd collects discretionary access control permission modification events
 echo "4.1.7 Collecting DAC events..."
-echo "-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod" >> /etc/audit/rules.d/audit.rules
-echo "-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod" >> /etc/audit/rules.d/audit.rules
+{
+echo "-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod"
+echo "-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod"
+} >> /etc/audit/rules.d/audit.rules
 
 # 4.1.8 Ensure auditd collects unsuccessful unauthorized access attempts to files
 echo "4.1.8 Collecting unauthorized access..."
-echo "-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access" >> /etc/audit/rules.d/audit.rules
-echo "-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access" >> /etc/audit/rules.d/audit.rules
+{
+echo "-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access"
+echo "-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access"
+} >> /etc/audit/rules.d/audit.rules
 
 # 4.1.9 Ensure auditd collects use of privileged commands
 echo "4.1.9 Collecting privileged commands..."
@@ -307,18 +312,24 @@ find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print "-a always,e
 
 # 4.1.10 Ensure auditd collects successful file system mounts
 echo "4.1.10 Collecting filesystem mounts..."
-echo "-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts" >> /etc/audit/rules.d/audit.rules
-echo "-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts" >> /etc/audit/rules.d/audit.rules
+{
+echo "-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts"
+echo "-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts"
+} >> /etc/audit/rules.d/audit.rules
 
 # 4.1.11 Ensure auditd collects file deletion events by user
 echo "4.1.11 Collecting file deletions..."
-echo "-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete" >> /etc/audit/rules.d/audit.rules
-echo "-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete" >> /etc/audit/rules.d/audit.rules
+{
+echo "-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete"
+echo "-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete"
+} >> /etc/audit/rules.d/audit.rules
 
 # 4.1.12 Ensure auditd collects changes to system administration scope
 echo "4.1.12 Collecting admin scope changes..."
-echo "-w /etc/sudoers -p wa -k scope" >> /etc/audit/rules.d/audit.rules
-echo "-w /etc/sudoers.d -p wa -k scope" >> /etc/audit/rules.d/audit.rules
+{
+echo "-w /etc/sudoers -p wa -k scope"
+echo "-w /etc/sudoers.d -p wa -k scope"
+} >> /etc/audit/rules.d/audit.rules
 
 # 4.1.13 Ensure auditd collects system administrator actions (sudolog)
 echo "4.1.13 Collecting sudo actions..."
@@ -335,8 +346,10 @@ echo "-a always,exit -F arch=b64 -S init_module -S delete_module -k modules"
 
 # 4.1.15 Ensure auditd collects the auditing rules themselves
 echo "4.1.15 Collecting audit rules..."
-echo "-w /etc/audit/audit.rules -p wa -k auditconfig" >> /etc/audit/rules.d/audit.rules
-echo "-w /etc/audit/rules.d -p wa -k auditconfig" >> /etc/audit/rules.d/audit.rules
+{
+echo "-w /etc/audit/audit.rules -p wa -k auditconfig"
+echo "-w /etc/audit/rules.d -p wa -k auditconfig"
+} >> /etc/audit/rules.d/audit.rules
 
 # 4.1.16 Ensure auditd collects successful and unsuccessful attempts to use the chcon command
 echo "4.1.16 Collecting chcon attempts..."
