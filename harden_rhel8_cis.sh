@@ -11,6 +11,39 @@ fi
 
 echo "Starting RHEL 8 CIS Level 1 Hardening..."
 
+# Pre-flight checks - ensure required packages are installed
+echo "Performing pre-flight checks..."
+
+# Check if running on RHEL/CentOS/Fedora
+if ! command -v rpm >/dev/null 2>&1 && ! command -v yum >/dev/null 2>&1 && ! command -v dnf >/dev/null 2>&1; then
+  echo "Error: This script requires RPM-based distribution (RHEL, CentOS, Fedora)"
+  exit 1
+fi
+
+# Install required packages
+REQUIRED_PACKAGES=("audit" "rsyslog" "logrotate" "firewalld" "pam" "openssh-server")
+for package in "${REQUIRED_PACKAGES[@]}"; do
+  if ! rpm -q "$package" >/dev/null 2>&1; then
+    echo "Installing required package: $package"
+    if command -v dnf >/dev/null 2>&1; then
+      dnf install -y "$package" || echo "Warning: Failed to install $package"
+    elif command -v yum >/dev/null 2>&1; then
+      yum install -y "$package" || echo "Warning: Failed to install $package"
+    fi
+  fi
+done
+
+# Ensure required commands are available
+REQUIRED_COMMANDS=("modprobe" "mount" "systemctl" "chmod" "chown" "usermod" "sed" "grep" "find" "sysctl")
+for cmd in "${REQUIRED_COMMANDS[@]}"; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "Error: Required command '$cmd' not found. Please install the necessary packages."
+    exit 1
+  fi
+done
+
+echo "Pre-flight checks completed."
+
 # 1.1.1 Disable unused filesystems
 echo "1.1.1 Disabling unused filesystems..."
 
@@ -124,7 +157,11 @@ echo "1.1.17 /home partition check - Manual check required"
 
 # 1.1.18 Ensure nodev option set on /home partition
 echo "1.1.18 Setting nodev on /home..."
-mount -o remount,nodev /home 2>/dev/null || echo "Warning: Could not remount /home with nodev"
+if mount | grep -q "on /home "; then
+  mount -o remount,nodev /home 2>/dev/null || echo "Warning: Could not remount /home with nodev"
+else
+  echo "Info: /home is not a separate mount point, skipping remount"
+fi
 
 # 1.1.19 Ensure nodev option set on removable media partitions
 echo "1.1.19 Removable media - Manual configuration required"
