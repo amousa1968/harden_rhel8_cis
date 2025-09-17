@@ -52,8 +52,6 @@ disable_module() {
   local module=$1
   if lsmod | grep -q "^${module}"; then
     modprobe -r "$module" || echo "Warning: Failed to remove module $module"
-  else
-    echo "Module $module not loaded or not present"
   fi
   echo "install $module /bin/true" >> "/etc/modprobe.d/${module}.conf"
 }
@@ -69,35 +67,39 @@ echo "install squashfs /bin/true" >> /etc/modprobe.d/squashfs.conf
 echo "install udf /bin/true" >> /etc/modprobe.d/udf.conf
 echo "install vfat /bin/true" >> /etc/modprobe.d/vfat.conf
 
+# Helper function to set mount options on a path
+set_mount_option() {
+  local path=$1
+  local option=$2
+  local description=$3
+
+  if mount | grep -q "on ${path} "; then
+    # Path is a separate mount point
+    mount -o remount,${option} "${path}" 2>/dev/null || echo "Warning: Could not remount ${path} with ${option}"
+  else
+    # Path is not a separate mount point, apply to root filesystem
+    mount -o remount,${option} / 2>/dev/null || echo "Warning: Could not remount root filesystem with ${option} for ${path}"
+  fi
+}
+
 # 1.1.2 Ensure /tmp is configured
 echo "1.1.2 Configuring /tmp..."
-# Assuming /tmp is already a separate partition or use tmpfs
-# systemctl unmask tmp.mount
-# systemctl enable tmp.mount
+# Check if /tmp should be a separate tmpfs mount
+if ! mount | grep -q "tmpfs on /tmp"; then
+  echo "Info: /tmp is not tmpfs, ensuring proper configuration"
+fi
 
 # 1.1.3 Ensure nodev option set on /tmp partition
 echo "1.1.3 Setting nodev on /tmp..."
-if mount | grep -q "on /tmp "; then
-  mount -o remount,nodev /tmp 2>/dev/null || echo "Warning: Could not remount /tmp with nodev"
-else
-  echo "Info: /tmp is not a separate mount point, skipping remount"
-fi
+set_mount_option "/tmp" "nodev" "nodev option for /tmp"
 
 # 1.1.4 Ensure nosuid option set on /tmp partition
 echo "1.1.4 Setting nosuid on /tmp..."
-if mount | grep -q "on /tmp "; then
-  mount -o remount,nosuid /tmp 2>/dev/null || echo "Warning: Could not remount /tmp with nosuid"
-else
-  echo "Info: /tmp is not a separate mount point, skipping remount"
-fi
+set_mount_option "/tmp" "nosuid" "nosuid option for /tmp"
 
 # 1.1.5 Ensure noexec option set on /tmp partition
 echo "1.1.5 Setting noexec on /tmp..."
-if mount | grep -q "on /tmp "; then
-  mount -o remount,noexec /tmp 2>/dev/null || echo "Warning: Could not remount /tmp with noexec"
-else
-  echo "Info: /tmp is not a separate mount point, skipping remount"
-fi
+set_mount_option "/tmp" "noexec" "noexec option for /tmp"
 
 # 1.1.6 Ensure /dev/shm is configured
 echo "1.1.6 Configuring /dev/shm..."
@@ -124,27 +126,15 @@ echo "1.1.11 /var/tmp partition check - Manual check required"
 
 # 1.1.12 Ensure nodev option set on /var/tmp partition
 echo "1.1.12 Setting nodev on /var/tmp..."
-if mount | grep -q "on /var/tmp "; then
-  mount -o remount,nodev /var/tmp 2>/dev/null || echo "Warning: Could not remount /var/tmp with nodev"
-else
-  echo "Info: /var/tmp is not a separate mount point, skipping remount"
-fi
+set_mount_option "/var/tmp" "nodev" "nodev option for /var/tmp"
 
 # 1.1.13 Ensure nosuid option set on /var/tmp partition
 echo "1.1.13 Setting nosuid on /var/tmp..."
-if mount | grep -q "on /var/tmp "; then
-  mount -o remount,nosuid /var/tmp 2>/dev/null || echo "Warning: Could not remount /var/tmp with nosuid"
-else
-  echo "Info: /var/tmp is not a separate mount point, skipping remount"
-fi
+set_mount_option "/var/tmp" "nosuid" "nosuid option for /var/tmp"
 
 # 1.1.14 Ensure noexec option set on /var/tmp partition
 echo "1.1.14 Setting noexec on /var/tmp..."
-if mount | grep -q "on /var/tmp "; then
-  mount -o remount,noexec /var/tmp 2>/dev/null || echo "Warning: Could not remount /var/tmp with noexec"
-else
-  echo "Info: /var/tmp is not a separate mount point, skipping remount"
-fi
+set_mount_option "/var/tmp" "noexec" "noexec option for /var/tmp"
 
 # 1.1.15 Ensure separate partition exists for /var/log
 echo "1.1.15 /var/log partition check - Manual check required"
@@ -157,11 +147,7 @@ echo "1.1.17 /home partition check - Manual check required"
 
 # 1.1.18 Ensure nodev option set on /home partition
 echo "1.1.18 Setting nodev on /home..."
-if mount | grep -q "on /home "; then
-  mount -o remount,nodev /home 2>/dev/null || echo "Warning: Could not remount /home with nodev"
-else
-  echo "Info: /home is not a separate mount point, skipping remount"
-fi
+set_mount_option "/home" "nodev" "nodev option for /home"
 
 # 1.1.19 Ensure nodev option set on removable media partitions
 echo "1.1.19 Removable media - Manual configuration required"
