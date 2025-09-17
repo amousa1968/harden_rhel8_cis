@@ -27,3 +27,4 @@ jobs:
           # Since actual hardening requires root and RHEL environment,
           # we simulate by running with -n option or echo commands
           bash -n "harden_rhel8_cis/harden_rhel8_cis.sh"
+          
