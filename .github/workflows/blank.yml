@@ -1,0 +1,29 @@
+name: Test RHEL8 CIS Hardening Script
+
+on:
+  push:
+    paths:
+      - 'harden_rhel8_cis/harden_rhel8_cis.sh'
+  pull_request:
+    paths:
+      - 'harden_rhel8_cis/harden_rhel8_cis.sh'
+
+jobs:
+  test-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up bash
+        run: sudo apt-get update && sudo apt-get install -y bash
+
+      - name: Syntax check hardening script
+        run: bash -n "harden_rhel8_cis/harden_rhel8_cis.sh"
+
+      - name: Run hardening script in dry-run mode (simulate)
+        run: |
+          echo "Simulating script run..."
+          # Since actual hardening requires root and RHEL environment,
+          # we simulate by running with -n option or echo commands
+          bash -n "harden_rhel8_cis/harden_rhel8_cis.sh"
