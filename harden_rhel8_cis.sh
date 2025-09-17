@@ -14,36 +14,26 @@ echo "Starting RHEL 8 CIS Level 1 Hardening..."
 # 1.1.1 Disable unused filesystems
 echo "1.1.1 Disabling unused filesystems..."
 
-# cramfs
-modprobe -r cramfs
-echo "install cramfs /bin/true" >> /etc/modprobe.d/cramfs.conf
+# Helper function to remove module if exists and disable it
+disable_module() {
+  local module=$1
+  if lsmod | grep -q "^${module}"; then
+    modprobe -r "$module" || echo "Warning: Failed to remove module $module"
+  else
+    echo "Module $module not loaded or not present"
+  fi
+  echo "install $module /bin/true" >> "/etc/modprobe.d/${module}.conf"
+}
 
-# freevxfs
-modprobe -r freevxfs
-echo "install freevxfs /bin/true" >> /etc/modprobe.d/freevxfs.conf
+disable_module cramfs
+disable_module freevxfs
+disable_module jffs2
+disable_module hfs
+disable_module hfsplus
 
-# jffs2
-modprobe -r jffs2
-echo "install jffs2 /bin/true" >> /etc/modprobe.d/jffs2.conf
-
-# hfs
-modprobe -r hfs
-echo "install hfs /bin/true" >> /etc/modprobe.d/hfs.conf
-
-# hfsplus
-modprobe -r hfsplus
-echo "install hfsplus /bin/true" >> /etc/modprobe.d/hfsplus.conf
-
-# squashfs
-modprobe -r squashfs
+# squashfs, vfat, udf are builtin modules on some systems, skip removal but disable
 echo "install squashfs /bin/true" >> /etc/modprobe.d/squashfs.conf
-
-# udf
-modprobe -r udf
 echo "install udf /bin/true" >> /etc/modprobe.d/udf.conf
-
-# vfat
-modprobe -r vfat
 echo "install vfat /bin/true" >> /etc/modprobe.d/vfat.conf
 
 # 1.1.2 Ensure /tmp is configured
@@ -54,20 +44,20 @@ echo "1.1.2 Configuring /tmp..."
 
 # 1.1.3 Ensure nodev option set on /tmp partition
 echo "1.1.3 Setting nodev on /tmp..."
-mount -o remount,nodev /tmp
+mount -o remount,nodev /tmp 2>/dev/null || echo "Warning: Could not remount /tmp with nodev"
 echo "/tmp /tmp tmpfs defaults,rw,nosuid,nodev,noexec,relatime 0 0" >> /etc/fstab
 
 # 1.1.4 Ensure nosuid option set on /tmp partition
 echo "1.1.4 Setting nosuid on /tmp..."
-mount -o remount,nosuid /tmp
+mount -o remount,nosuid /tmp 2>/dev/null || echo "Warning: Could not remount /tmp with nosuid"
 
 # 1.1.5 Ensure noexec option set on /tmp partition
 echo "1.1.5 Setting noexec on /tmp..."
-mount -o remount,noexec /tmp
+mount -o remount,noexec /tmp 2>/dev/null || echo "Warning: Could not remount /tmp with noexec"
 
 # 1.1.6 Ensure /dev/shm is configured
 echo "1.1.6 Configuring /dev/shm..."
-mount -o remount,nodev,nosuid,noexec /dev/shm
+mount -o remount,nodev,nosuid,noexec /dev/shm 2>/dev/null || echo "Warning: Could not remount /dev/shm"
 
 # 1.1.7 Ensure nodev option set on /dev/shm partition
 # Already done above
@@ -86,15 +76,15 @@ echo "1.1.11 /var/tmp partition check - Manual check required"
 
 # 1.1.12 Ensure nodev option set on /var/tmp partition
 echo "1.1.12 Setting nodev on /var/tmp..."
-mount -o remount,nodev /var/tmp
+mount -o remount,nodev /var/tmp 2>/dev/null || echo "Warning: Could not remount /var/tmp with nodev"
 
 # 1.1.13 Ensure nosuid option set on /var/tmp partition
 echo "1.1.13 Setting nosuid on /var/tmp..."
-mount -o remount,nosuid /var/tmp
+mount -o remount,nosuid /var/tmp 2>/dev/null || echo "Warning: Could not remount /var/tmp with nosuid"
 
 # 1.1.14 Ensure noexec option set on /var/tmp partition
 echo "1.1.14 Setting noexec on /var/tmp..."
-mount -o remount,noexec /var/tmp
+mount -o remount,noexec /var/tmp 2>/dev/null || echo "Warning: Could not remount /var/tmp with noexec"
 
 # 1.1.15 Ensure separate partition exists for /var/log
 echo "1.1.15 /var/log partition check - Manual check required"
@@ -107,7 +97,7 @@ echo "1.1.17 /home partition check - Manual check required"
 
 # 1.1.18 Ensure nodev option set on /home partition
 echo "1.1.18 Setting nodev on /home..."
-mount -o remount,nodev /home
+mount -o remount,nodev /home 2>/dev/null || echo "Warning: Could not remount /home with nodev"
 
 # 1.1.19 Ensure nodev option set on removable media partitions
 echo "1.1.19 Removable media - Manual configuration required"
