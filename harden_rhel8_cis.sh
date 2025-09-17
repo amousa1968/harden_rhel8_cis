@@ -214,26 +214,30 @@ echo "install tipc /bin/true" >> /etc/modprobe.d/tipc.conf
 
 # 3.2 Network Parameters (Host Only)
 echo "3.2 Configuring network parameters..."
-echo "net.ipv4.ip_forward = 0" >> /etc/sysctl.conf
-echo "net.ipv4.conf.all.send_redirects = 0" >> /etc/sysctl.conf
-echo "net.ipv4.conf.default.send_redirects = 0" >> /etc/sysctl.conf
+{
+echo "net.ipv4.ip_forward = 0"
+echo "net.ipv4.conf.all.send_redirects = 0"
+echo "net.ipv4.conf.default.send_redirects = 0"
+} >> /etc/sysctl.conf
 sysctl -p
 
 # 3.3 Network Parameters (Host and Router)
 echo "3.3 Configuring network parameters..."
-echo "net.ipv4.conf.all.accept_source_route = 0" >> /etc/sysctl.conf
-echo "net.ipv4.conf.all.accept_redirects = 0" >> /etc/sysctl.conf
-echo "net.ipv4.conf.all.secure_redirects = 0" >> /etc/sysctl.conf
-echo "net.ipv4.conf.all.log_martians = 1" >> /etc/sysctl.conf
-echo "net.ipv4.conf.default.accept_source_route = 0" >> /etc/sysctl.conf
-echo "net.ipv4.conf.default.accept_redirects = 0" >> /etc/sysctl.conf
-echo "net.ipv4.conf.default.secure_redirects = 0" >> /etc/sysctl.conf
-echo "net.ipv4.conf.default.log_martians = 1" >> /etc/sysctl.conf
-echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> /etc/sysctl.conf
-echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" >> /etc/sysctl.conf
-echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.conf
-echo "net.ipv4.conf.default.rp_filter = 1" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_syncookies = 1" >> /etc/sysctl.conf
+{
+echo "net.ipv4.conf.all.accept_source_route = 0"
+echo "net.ipv4.conf.all.accept_redirects = 0"
+echo "net.ipv4.conf.all.secure_redirects = 0"
+echo "net.ipv4.conf.all.log_martians = 1"
+echo "net.ipv4.conf.default.accept_source_route = 0"
+echo "net.ipv4.conf.default.accept_redirects = 0"
+echo "net.ipv4.conf.default.secure_redirects = 0"
+echo "net.ipv4.conf.default.log_martians = 1"
+echo "net.ipv4.icmp_echo_ignore_broadcasts = 1"
+echo "net.ipv4.icmp_ignore_bogus_error_responses = 1"
+echo "net.ipv4.conf.all.rp_filter = 1"
+echo "net.ipv4.conf.default.rp_filter = 1"
+echo "net.ipv4.tcp_syncookies = 1"
+} >> /etc/sysctl.conf
 sysctl -p
 
 # 3.4 Uncommon Network Protocols
@@ -281,9 +285,11 @@ echo "-w /var/run/faillock -p wa -k logins" >> /etc/audit/rules.d/audit.rules
 
 # 4.1.6 Ensure auditd collects process and session initiation information
 echo "4.1.6 Collecting process/session info..."
-echo "-w /var/run/utmp -p wa -k session" >> /etc/audit/rules.d/audit.rules
-echo "-w /var/log/wtmp -p wa -k logins" >> /etc/audit/rules.d/audit.rules
-echo "-w /var/log/btmp -p wa -k logins" >> /etc/audit/rules.d/audit.rules
+{
+echo "-w /var/run/utmp -p wa -k session"
+echo "-w /var/log/wtmp -p wa -k logins"
+echo "-w /var/log/btmp -p wa -k logins"
+} >> /etc/audit/rules.d/audit.rules
 
 # 4.1.7 Ensure auditd collects discretionary access control permission modification events
 echo "4.1.7 Collecting DAC events..."
@@ -320,10 +326,12 @@ echo "-w /var/log/sudo.log -p wa -k actions" >> /etc/audit/rules.d/audit.rules
 
 # 4.1.14 Ensure auditd collects kernel module loading and unloading
 echo "4.1.14 Collecting kernel module events..."
-echo "-w /sbin/insmod -p x -k modules" >> /etc/audit/rules.d/audit.rules
-echo "-w /sbin/rmmod -p x -k modules" >> /etc/audit/rules.d/audit.rules
-echo "-w /sbin/modprobe -p x -k modules" >> /etc/audit/rules.d/audit.rules
-echo "-a always,exit -F arch=b64 -S init_module -S delete_module -k modules" >> /etc/audit/rules.d/audit.rules
+{
+echo "-w /sbin/insmod -p x -k modules"
+echo "-w /sbin/rmmod -p x -k modules"
+echo "-w /sbin/modprobe -p x -k modules"
+echo "-a always,exit -F arch=b64 -S init_module -S delete_module -k modules"
+} >> /etc/audit/rules.d/audit.rules
 
 # 4.1.15 Ensure auditd collects the auditing rules themselves
 echo "4.1.15 Collecting audit rules..."
