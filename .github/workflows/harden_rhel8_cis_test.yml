@@ -2,8 +2,9 @@ name: Test RHEL8 CIS Hardening Scripts
 
 on:
   push:
-    paths:
-      - 'harden_rhel8_cis-1/**'
+    branches:
+      - main
+      - master
 
 jobs:
   test-scripts:
