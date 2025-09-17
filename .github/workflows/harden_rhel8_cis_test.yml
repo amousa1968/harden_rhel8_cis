@@ -34,4 +34,14 @@ jobs:
         echo "Simulating hardening script execution..."
         # Since this is a CI environment, we can't run the full hardening script
         # but we can check if it starts without errors
-        timeout 10s bash harden_rhel8_cis.sh || echo "Script started but timed out (expected in CI)"
+        set +e
+        timeout 10s bash harden_rhel8_cis.sh
+        exit_code=$?
+        set -e
+        if [ $exit_code -eq 124 ]; then
+          echo "Script timed out (expected in CI)"
+        elif [ $exit_code -eq 1 ]; then
+          echo "Script exited due to no root privileges (expected in CI)"
+        else
+          echo "Script exited with code $exit_code"
+        fi
