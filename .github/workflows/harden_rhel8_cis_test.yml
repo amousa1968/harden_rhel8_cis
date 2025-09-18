@@ -48,8 +48,10 @@ jobs:
         fi
 
     - name: Cleanup permissions for post-job
+      working-directory: /tmp
       run: |
         echo "Cleaning up permissions to prevent post-job cleanup errors..."
-        sudo find . -type f -exec chmod 644 {} \; 2>/dev/null || true
-        sudo find . -type d -exec chmod 755 {} \; 2>/dev/null || true
+        sudo chmod 755 /home/runner/work/harden_rhel8_cis/harden_rhel8_cis 2>/dev/null || true
+        sudo find /home/runner/work/harden_rhel8_cis/harden_rhel8_cis -type f -exec chmod 644 {} \; 2>/dev/null || true
+        sudo find /home/runner/work/harden_rhel8_cis/harden_rhel8_cis -type d -exec chmod 755 {} \; 2>/dev/null || true
         sudo chmod -R 755 /home/runner/work 2>/dev/null || true
