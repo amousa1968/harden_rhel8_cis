@@ -63,4 +63,12 @@ else
     echo "✗ yum command not found (expected on non-RHEL systems)"
 fi
 
+# 8. Attempt to run the hardening script (will exit early in CI)
+echo "8. Attempting to run hardening script..."
+if bash harden_rhel8_cis.sh; then
+    echo "✓ Hardening script completed successfully"
+else
+    echo "✗ Hardening script failed or exited early (expected in CI)"
+fi
+
 echo "Enhanced testing completed. For full validation, run on a RHEL 8 system with root privileges."
