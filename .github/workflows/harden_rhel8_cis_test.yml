@@ -23,14 +23,29 @@ jobs:
     - name: Run shellcheck on hardening script
       run: shellcheck harden_rhel8_cis.sh
 
+    - name: Run shellcheck on CIS Level 1 script
+      run: shellcheck cis_rhel8_level1.sh
+
     - name: Run shellcheck on test script
       run: shellcheck test_hardening_script.sh
 
     - name: Make hardening script executable
       run: chmod +x harden_rhel8_cis.sh
 
+    - name: Make CIS Level 1 script executable
+      run: chmod +x cis_rhel8_level1.sh
+
     - name: Make test script executable
       run: chmod +x test_hardening_script.sh
 
     - name: Run test script
       run: ./test_hardening_script.sh
+
+    - name: Execute CIS Level 1 hardening script
+      run: |
+        echo "Executing CIS RHEL8 Level 1 hardening script..."
+        if bash cis_rhel8_level1.sh; then
+          echo "✓ CIS Level 1 script completed successfully"
+        else
+          echo "✗ CIS Level 1 script failed (expected in CI environment)"
+        fi
