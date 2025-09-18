@@ -11,7 +11,8 @@ fi
 
 # Skip in CI environments
 if [[ -n "$CI" ]] || [[ -n "$GITHUB_ACTIONS" ]]; then
-   echo "Running in CI environment - continuing with limited hardening"
+   echo "Running in CI environment - skipping operations that modify system files"
+   exit 0
 fi
 
 echo "Starting RHEL 8 CIS Level 1 Hardening..."
