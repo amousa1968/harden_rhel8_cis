@@ -35,10 +35,6 @@ jobs:
     - name: Run test script
       run: ./test_hardening_script.sh
 
-    - name: Fix permissions for cleanup
-      if: always()
-      run: sudo chmod -R 755 /home/runner/work/linux_scripts/linux_scripts || true
-
     - name: Attempt to run hardening script
       run: |
         echo "Attempting to run hardening script (will likely fail on Ubuntu)..."
@@ -50,3 +46,7 @@ jobs:
         if [ $exit_code -ne 0 ]; then
           echo "Script failed as expected in CI environment"
         fi
+
+    - name: Fix permissions for cleanup
+      if: always()
+      run: sudo chmod -R 755 /home/runner/work/ || true
