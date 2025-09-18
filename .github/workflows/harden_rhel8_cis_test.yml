@@ -46,3 +46,10 @@ jobs:
         if [ $exit_code -ne 0 ]; then
           echo "Script failed as expected in CI environment"
         fi
+
+    - name: Cleanup permissions for post-job
+      run: |
+        echo "Cleaning up permissions to prevent post-job cleanup errors..."
+        sudo find . -type f -exec chmod 644 {} \; 2>/dev/null || true
+        sudo find . -type d -exec chmod 755 {} \; 2>/dev/null || true
+        sudo chmod -R 755 /home/runner/work 2>/dev/null || true
