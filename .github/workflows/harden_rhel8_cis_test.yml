@@ -14,6 +14,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Debug working directory
+      run: |
+        pwd
+        ls -la
+        whoami
+
     - name: Run shellcheck on hardening script
       run: shellcheck harden_rhel8_cis.sh
 
