@@ -18,7 +18,7 @@ echo "Starting RHEL 8 CIS Level 1 Hardening..."
 
 # Function for safe command execution in CI
 safe_cmd() {
-  "$@" 2>/dev/null || echo "Command failed (expected in CI): $@"
+  "$@" 2>/dev/null || echo "Command failed (expected in CI): $*"
 }
 
 # Pre-flight checks - ensure required packages are installed
