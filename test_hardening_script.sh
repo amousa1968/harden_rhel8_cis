@@ -49,8 +49,7 @@ echo "5. SELinux status: $selinux_status"
 # 6. Check for disabled services (simulate)
 services=("avahi-daemon" "cups" "dhcpd" "slapd" "nfs" "rpcbind" "named" "vsftpd" "httpd" "dovecot" "smb" "squid" "snmpd")
 for svc in "${services[@]}"; do
-    systemctl is-enabled $svc &>/dev/null
-    if [ $? -ne 0 ]; then
+    if ! systemctl is-enabled "$svc" &>/dev/null; then
         echo "✓ Service $svc is disabled or not installed"
     else
         echo "✗ Service $svc is enabled"
