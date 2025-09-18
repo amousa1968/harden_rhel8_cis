@@ -4,7 +4,7 @@
 
 LOG="/var/log/cis_rhel8_level1.log"
 REPORT="/var/log/cis_rhel8_level1_report.txt"
-> "$REPORT" || true
+: > "$REPORT"
 
 log() {
   echo "$(date '+%F %T') : $1" | tee -a "$LOG"
