@@ -34,3 +34,15 @@ jobs:
 
     - name: Run test script
       run: ./test_hardening_script.sh
+
+    - name: Attempt to run hardening script
+      run: |
+        echo "Attempting to run hardening script (will likely fail on Ubuntu)..."
+        set +e
+        sudo bash harden_rhel8_cis.sh
+        exit_code=$?
+        set -e
+        echo "Script exited with code $exit_code"
+        if [ $exit_code -ne 0 ]; then
+          echo "Script failed as expected in CI environment"
+        fi
