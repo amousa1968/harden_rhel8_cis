@@ -4,14 +4,14 @@
 
 LOG="/var/log/cis_rhel8_level1.log"
 REPORT="/var/log/cis_rhel8_level1_report.txt"
-> "$REPORT"
+> "$REPORT" || true
 
 log() {
   echo "$(date '+%F %T') : $1" | tee -a "$LOG"
 }
 
 check_result() {
-  if [ $1 -eq 0 ]; then
+  if [ "$1" -eq 0 ]; then
     echo "[PASS] $2" | tee -a "$REPORT"
   else
     echo "[FAIL] $2" | tee -a "$REPORT"
@@ -40,20 +40,24 @@ done
 ############################################
 
 # 2.2 Ensure xinetd is not installed
-rpm -q xinetd &>/dev/null
-if [ $? -eq 0 ]; then
+if rpm -q xinetd &>/dev/null; then
   yum remove -y xinetd
 fi
-rpm -q xinetd &>/dev/null
-check_result $? "xinetd not installed"
+if rpm -q xinetd &>/dev/null; then
+  check_result 1 "xinetd not installed"
+else
+  check_result 0 "xinetd not installed"
+fi
 
 # 2.3 Ensure telnet is not installed
-rpm -q telnet &>/dev/null
-if [ $? -eq 0 ]; then
+if rpm -q telnet &>/dev/null; then
   yum remove -y telnet
 fi
-rpm -q telnet &>/dev/null
-check_result $? "telnet not installed"
+if rpm -q telnet &>/dev/null; then
+  check_result 1 "telnet not installed"
+else
+  check_result 0 "telnet not installed"
+fi
 
 ############################################
 # 3. Network Configuration
