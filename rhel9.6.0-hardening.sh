@@ -433,11 +433,15 @@ fi
 
 # CIS 4.1.6 - Ensure auditd collects process and session initiation information
 log "Configuring auditd to collect process/session info"
-{
-echo "-w /var/run/utmp -p wa -k session"
-echo "-w /var/log/wtmp -p wa -k logins"
-echo "-w /var/log/btmp -p wa -k logins"
-} >> /etc/audit/rules.d/audit.rules
+if [ -d /etc/audit/rules.d ]; then
+    {
+    echo "-w /var/run/utmp -p wa -k session"
+    echo "-w /var/log/wtmp -p wa -k logins"
+    echo "-w /var/log/btmp -p wa -k logins"
+    } >> /etc/audit/rules.d/audit.rules
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.7 - Ensure auditd collects discretionary access control permission modification events
 log "Configuring auditd for DAC permission modifications"
@@ -503,11 +507,11 @@ fi
 # CIS 4.1.14 - Ensure auditd collects kernel module loading and unloading
 log "Configuring auditd for kernel module loading/unloading"
 if [ -d /etc/audit/rules.d ]; then
-{
-echo "-w /sbin/insmod -p x -k modules"
-echo "-w /sbin/rmmod -p x -k modules"
-echo "-w /sbin/modprobe -p x -k modules"
-} >> /etc/audit/rules.d/audit.rules
+    {
+    echo "-w /sbin/insmod -p x -k modules"
+    echo "-w /sbin/rmmod -p x -k modules"
+    echo "-w /sbin/modprobe -p x -k modules"
+    } >> /etc/audit/rules.d/audit.rules
 else
     log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
 fi
@@ -542,13 +546,13 @@ fi
 # CIS 4.1.18 - Ensure auditd collects user and group information
 log "Configuring auditd for user/group information"
 if [ -d /etc/audit/rules.d ]; then
-{
-echo "-w /etc/group -p wa -k identity"
-echo "-w /etc/passwd -p wa -k identity"
-echo "-w /etc/gshadow -p wa -k identity"
-echo "-w /etc/shadow -p wa -k identity"
-echo "-w /etc/security/opasswd -p wa -k identity"
-} >> /etc/audit/rules.d/audit.rules
+    {
+    echo "-w /etc/group -p wa -k identity"
+    echo "-w /etc/passwd -p wa -k identity"
+    echo "-w /etc/gshadow -p wa -k identity"
+    echo "-w /etc/shadow -p wa -k identity"
+    echo "-w /etc/security/opasswd -p wa -k identity"
+    } >> /etc/audit/rules.d/audit.rules
 else
     log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
 fi
