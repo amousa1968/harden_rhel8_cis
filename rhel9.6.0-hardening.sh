@@ -96,9 +96,13 @@ fi
 
 # CIS 1.1.4 - Ensure AIDE is installed
 log "Installing AIDE"
-sudo dnf install -y aide
-sudo aide --init
-sudo mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
+if command -v dnf > /dev/null; then
+    sudo dnf install -y aide
+    if command -v aide > /dev/null; then
+        sudo aide --init
+        sudo mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
+    fi
+fi
 
 # CIS 1.1.5 - Ensure filesystem integrity is regularly checked
 log "Configuring filesystem integrity check"
@@ -110,7 +114,9 @@ sudo dnf config-manager --set-enabled rhui-client-config-server-9
 
 # CIS 1.2.2 - Ensure GPG keys are configured
 log "Configuring GPG keys"
-sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+if command -v rpm > /dev/null; then
+    sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+fi
 
 # CIS 1.3.1 - Ensure sudo is installed
 log "Ensuring sudo is installed"
@@ -122,7 +128,7 @@ sudo sh -c 'echo "Defaults use_pty" >> /etc/sudoers'
 
 # CIS 1.3.3 - Ensure sudo log file exists
 log "Configuring sudo log file"
-echo "Defaults logfile=\"/var/log/sudo.log\"" >> /etc/sudoers
+sudo sh -c 'echo "Defaults logfile=\"/var/log/sudo.log\"" >> /etc/sudoers'
 
 # CIS 1.4.1 - Ensure AIDE is installed (already done above)
 
@@ -149,25 +155,31 @@ sudo dnf install -y libselinux
 
 # CIS 1.6.2 - Ensure SELinux is not disabled in bootloader configuration
 log "Configuring SELinux in bootloader"
-sed -i 's/selinux=0/selinux=1/' /etc/default/grub
-grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg
+if [ -f /etc/default/grub ]; then
+    sudo sed -i 's/selinux=0/selinux=1/' /etc/default/grub
+fi
+if command -v grub2-mkconfig > /dev/null; then
+    sudo grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg
+fi
 
 # CIS 1.6.3 - Ensure SELinux policy is configured
 log "Configuring SELinux policy"
-sudo setsebool -P httpd_can_network_connect=0
-sudo setsebool -P httpd_can_network_connect_db=0
+if command -v setsebool > /dev/null; then
+    sudo setsebool -P httpd_can_network_connect=0
+    sudo setsebool -P httpd_can_network_connect_db=0
+fi
 
 # CIS 1.7.1 - Ensure message of the day is configured properly
 log "Configuring message of the day"
-echo "Authorized uses only. All activity may be monitored and reported." > /etc/motd
+sudo sh -c 'echo "Authorized uses only. All activity may be monitored and reported." > /etc/motd'
 
 # CIS 1.7.2 - Ensure local login warning banner is configured properly
 log "Configuring local login warning banner"
-echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue
+sudo sh -c 'echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue'
 
 # CIS 1.7.3 - Ensure remote login warning banner is configured properly
 log "Configuring remote login warning banner"
-echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue.net
+sudo sh -c 'echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue.net'
 
 # CIS 1.7.4 - Ensure permissions on /etc/motd are configured
 log "Setting permissions on /etc/motd"
@@ -200,15 +212,21 @@ log "Configuring Red Hat Subscription Manager"
 
 # CIS 1.10.1 - Ensure system-wide crypto policy is not legacy
 log "Configuring system-wide crypto policy"
-sudo update-crypto-policies --set DEFAULT
+if command -v update-crypto-policies > /dev/null; then
+    sudo update-crypto-policies --set DEFAULT
+fi
 
 # CIS 1.10.2 - Ensure system-wide crypto policy is FUTURE or FIPS
 log "Ensuring crypto policy is FUTURE or FIPS"
-sudo update-crypto-policies --set FUTURE
+if command -v update-crypto-policies > /dev/null; then
+    sudo update-crypto-policies --set FUTURE
+fi
 
 # CIS 2.1.1 - Ensure time synchronization is in use
 log "Configuring time synchronization"
-sudo dnf install -y chrony
+if command -v dnf > /dev/null; then
+    sudo dnf install -y chrony
+fi
 sudo systemctl enable chronyd
 sudo systemctl start chronyd
 
@@ -368,11 +386,11 @@ sudo dnf install -y tcp_wrappers
 
 # CIS 3.4.2 - Ensure /etc/hosts.allow is configured
 log "Configuring /etc/hosts.allow"
-echo "ALL: LOCAL" > /etc/hosts.allow
+sudo sh -c 'echo "ALL: LOCAL" > /etc/hosts.allow'
 
 # CIS 3.4.3 - Ensure /etc/hosts.deny is configured
 log "Configuring /etc/hosts.deny"
-echo "ALL: ALL" > /etc/hosts.deny
+sudo sh -c 'echo "ALL: ALL" > /etc/hosts.deny'
 
 # CIS 3.4.4 - Ensure permissions on /etc/hosts.allow are configured
 log "Setting permissions on /etc/hosts.allow"
@@ -384,7 +402,9 @@ sudo chmod 644 /etc/hosts.deny
 
 # CIS 4.1.1 - Ensure auditd is installed
 log "Installing auditd"
-sudo dnf install -y audit
+if command -v dnf > /dev/null; then
+    sudo dnf install -y audit
+fi
 
 # CIS 4.1.2 - Ensure auditd service is enabled
 log "Enabling auditd service"
@@ -392,16 +412,24 @@ sudo systemctl enable auditd
 
 # CIS 4.1.3 - Ensure auditing for processes that start prior to auditd is enabled
 log "Enabling auditing for processes prior to auditd"
-sudo grubby --update-kernel ALL --args "audit=1"
+if command -v grubby > /dev/null; then
+    sudo grubby --update-kernel ALL --args "audit=1"
+fi
 
 # CIS 4.1.4 - Ensure audit_backlog_limit is sufficient
 log "Configuring audit_backlog_limit"
-sudo grubby --update-kernel ALL --args "audit_backlog_limit=8192"
+if command -v grubby > /dev/null; then
+    sudo grubby --update-kernel ALL --args "audit_backlog_limit=8192"
+fi
 
 # CIS 4.1.5 - Ensure auditd collects login and logout events
 log "Configuring auditd to collect login/logout events"
-sudo sh -c 'echo "-w /var/log/lastlog -p wa -k logins" >> /etc/audit/rules.d/audit.rules'
-sudo sh -c 'echo "-w /var/run/faillock -p wa -k logins" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-w /var/log/lastlog -p wa -k logins" >> /etc/audit/rules.d/audit.rules'
+    sudo sh -c 'echo "-w /var/run/faillock -p wa -k logins" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.6 - Ensure auditd collects process and session initiation information
 log "Configuring auditd to collect process/session info"
@@ -413,62 +441,107 @@ echo "-w /var/log/btmp -p wa -k logins"
 
 # CIS 4.1.7 - Ensure auditd collects discretionary access control permission modification events
 log "Configuring auditd for DAC permission modifications"
-sudo sh -c 'echo "-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod" >> /etc/audit/rules.d/audit.rules'
-sudo sh -c 'echo "-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod" >> /etc/audit/rules.d/audit.rules'
+    sudo sh -c 'echo "-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.8 - Ensure auditd collects unsuccessful unauthorized access attempts to files
 log "Configuring auditd for unsuccessful file access"
-sudo sh -c 'echo "-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access" >> /etc/audit/rules.d/audit.rules'
-sudo sh -c 'echo "-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access" >> /etc/audit/rules.d/audit.rules'
+    sudo sh -c 'echo "-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.9 - Ensure auditd collects use of privileged commands
 log "Configuring auditd for privileged commands"
-find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print "-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged" }' >> /etc/audit/rules.d/audit.rules
+if [ -d /etc/audit/rules.d ]; then
+    find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print "-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged" }' >> /etc/audit/rules.d/audit.rules
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.10 - Ensure auditd collects successful file system mounts
 log "Configuring auditd for successful filesystem mounts"
-sudo sh -c 'echo "-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts" >> /etc/audit/rules.d/audit.rules'
-sudo sh -c 'echo "-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts" >> /etc/audit/rules.d/audit.rules'
+    sudo sh -c 'echo "-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.11 - Ensure auditd collects file deletion events by user
 log "Configuring auditd for file deletion events"
-sudo sh -c 'echo "-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete" >> /etc/audit/rules.d/audit.rules'
-sudo sh -c 'echo "-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete" >> /etc/audit/rules.d/audit.rules'
+    sudo sh -c 'echo "-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.12 - Ensure auditd collects changes to system administration scope
 log "Configuring auditd for system administration scope changes"
-sudo sh -c 'echo "-w /etc/sudoers -p wa -k scope" >> /etc/audit/rules.d/audit.rules'
-sudo sh -c 'echo "-w /etc/sudoers.d -p wa -k scope" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-w /etc/sudoers -p wa -k scope" >> /etc/audit/rules.d/audit.rules'
+    sudo sh -c 'echo "-w /etc/sudoers.d -p wa -k scope" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.13 - Ensure auditd collects system administrator actions
 log "Configuring auditd for system administrator actions"
-sudo sh -c 'echo "-w /var/log/sudo.log -p wa -k actions" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-w /var/log/sudo.log -p wa -k actions" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.14 - Ensure auditd collects kernel module loading and unloading
 log "Configuring auditd for kernel module loading/unloading"
+if [ -d /etc/audit/rules.d ]; then
 {
 echo "-w /sbin/insmod -p x -k modules"
 echo "-w /sbin/rmmod -p x -k modules"
 echo "-w /sbin/modprobe -p x -k modules"
 } >> /etc/audit/rules.d/audit.rules
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.15 - Ensure auditd collects information on the use of special rights
 log "Configuring auditd for special rights usage"
-sudo sh -c 'echo "-a always,exit -F arch=b64 -S setuid -F auid>=1000 -F auid!=4294967295 -k special" >> /etc/audit/rules.d/audit.rules'
-sudo sh -c 'echo "-a always,exit -F arch=b32 -S setuid -F auid>=1000 -F auid!=4294967295 -k special" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-a always,exit -F arch=b64 -S setuid -F auid>=1000 -F auid!=4294967295 -k special" >> /etc/audit/rules.d/audit.rules'
+    sudo sh -c 'echo "-a always,exit -F arch=b32 -S setuid -F auid>=1000 -F auid!=4294967295 -k special" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.16 - Ensure auditd collects information on exporting to media
 log "Configuring auditd for media export"
-sudo sh -c 'echo "-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k export" >> /etc/audit/rules.d/audit.rules'
-sudo sh -c 'echo "-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k export" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k export" >> /etc/audit/rules.d/audit.rules'
+    sudo sh -c 'echo "-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k export" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.17 - Ensure auditd collects filesystem mounts
 log "Configuring auditd for filesystem mounts"
-sudo sh -c 'echo "-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts" >> /etc/audit/rules.d/audit.rules'
-sudo sh -c 'echo "-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts" >> /etc/audit/rules.d/audit.rules'
+    sudo sh -c 'echo "-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.18 - Ensure auditd collects user and group information
 log "Configuring auditd for user/group information"
+if [ -d /etc/audit/rules.d ]; then
 {
 echo "-w /etc/group -p wa -k identity"
 echo "-w /etc/passwd -p wa -k identity"
@@ -476,6 +549,9 @@ echo "-w /etc/gshadow -p wa -k identity"
 echo "-w /etc/shadow -p wa -k identity"
 echo "-w /etc/security/opasswd -p wa -k identity"
 } >> /etc/audit/rules.d/audit.rules
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.19 - Ensure auditd collects information on the use of special rights
 log "Configuring auditd for special rights usage (duplicate, already done)"
@@ -488,161 +564,41 @@ log "Configuring auditd for special rights usage (duplicate, already done)"
 
 # CIS 4.1.23 - Ensure auditd collects attempts to alter time through adjtimex
 log "Configuring auditd for time alteration attempts"
-sudo sh -c 'echo "-a always,exit -F arch=b64 -S adjtimex -S settimeofday -S clock_settime -k time-change" >> /etc/audit/rules.d/audit.rules'
-sudo sh -c 'echo "-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S clock_settime -k time-change" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-a always,exit -F arch=b64 -S adjtimex -S settimeofday -S clock_settime -k time-change" >> /etc/audit/rules.d/audit.rules'
+    sudo sh -c 'echo "-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S clock_settime -k time-change" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.24 - Ensure auditd collects attempts to alter time through settimeofday
 log "Configuring auditd for settimeofday attempts (duplicate)"
 
 # CIS 4.1.25 - Ensure auditd collects attempts to alter time through stime
 log "Configuring auditd for stime attempts"
-sudo sh -c 'echo "-a always,exit -F arch=b32 -S stime -k time-change" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-a always,exit -F arch=b32 -S stime -k time-change" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 # CIS 4.1.26 - Ensure auditd collects attempts to alter time through clock_settime
 log "Configuring auditd for clock_settime attempts (duplicate)"
 
 # CIS 4.1.27 - Ensure auditd collects attempts to alter time through /etc/localtime
 log "Configuring auditd for /etc/localtime alterations"
-sudo sh -c 'echo "-w /etc/localtime -p wa -k time-change" >> /etc/audit/rules.d/audit.rules'
-
-# CIS 4.1.28 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.29 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.30 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.31 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.32 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.33 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.34 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.35 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.36 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.37 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.38 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.39 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.40 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.41 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.42 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.43 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.44 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.45 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.46 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.47 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.48 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.49 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.50 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.51 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.52 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.53 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.54 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.55 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.56 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.57 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.58 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.59 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.60 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.61 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.62 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.63 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.64 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.65 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.66 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.67 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.68 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.69 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.70 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.71 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.72 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.73 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.74 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.75 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.76 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.77 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.78 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.79 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.80 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.81 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.82 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.83 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.84 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.85 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.86 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.87 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.88 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.89 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS 4.1.90 - Ensure auditd collects attempts to alter time through stime (duplicate)
-
-# CIS 4.1.91 - Ensure auditd collects attempts to alter time through clock_settime (duplicate)
-
-# CIS 4.1.92 - Ensure auditd collects attempts to alter time through /etc/localtime (duplicate)
-
-# CIS 4.1.93 - Ensure auditd collects attempts to alter time through adjtimex (duplicate)
-
-# CIS 4.1.94 - Ensure auditd collects attempts to alter time through settimeofday (duplicate)
-
-# CIS
-
-# CIS 4.1.27 - Ensure auditd configuration is immutable
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-w /etc/localtime -p wa -k time-change" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
+
+# CIS 4.1.94 - Ensure auditd configuration is immutable
 log "Making auditd configuration immutable"
-sudo sh -c 'echo "-e 2" >> /etc/audit/rules.d/audit.rules'
+if [ -d /etc/audit/rules.d ]; then
+    sudo sh -c 'echo "-e 2" >> /etc/audit/rules.d/audit.rules'
+else
+    log "Warning: /etc/audit/rules.d directory does not exist, skipping audit rules configuration"
+fi
 
 log "RHEL 9.6.0 hardening script completed successfully"
