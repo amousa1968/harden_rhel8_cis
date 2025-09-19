@@ -49,3 +49,17 @@ jobs:
         else
           echo "✗ CIS Level 1 script failed (expected in CI environment)"
         fi
+    - name: Run shellcheck on RHEL 9 hardening script
+      run: shellcheck rhel9.6.0-hardening.sh
+
+    - name: Make RHEL 9 hardening script executable
+      run: chmod +x rhel9.6.0-hardening.sh
+
+    - name: Execute RHEL 9 hardening script
+      run: |
+        echo "Executing RHEL 9.6.0 hardening script..."
+        if bash rhel9.6.0-hardening.sh; then
+          echo "✓ RHEL 9 hardening script completed successfully"
+        else
+          echo "✗ RHEL 9 hardening script failed (expected in CI environment)"
+        fi
