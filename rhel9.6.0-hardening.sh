@@ -239,9 +239,9 @@ log "Configuring time synchronization"
 if command -v dnf > /dev/null; then
     sudo dnf install -y chrony
 fi
-if systemctl list-unit-files | grep -q chronyd; then
-    sudo systemctl enable chronyd
-    sudo systemctl start chronyd
+if systemctl list-unit-files 2>/dev/null | grep -q '^chronyd\.service'; then
+    sudo systemctl enable chronyd 2>/dev/null || log "Warning: Failed to enable chronyd service"
+    sudo systemctl start chronyd 2>/dev/null || log "Warning: Failed to start chronyd service"
 fi
 
 # CIS 2.1.2 - Ensure chrony is configured
@@ -456,8 +456,8 @@ fi
 
 # CIS 4.1.2 - Ensure auditd service is enabled
 log "Enabling auditd service"
-if systemctl list-unit-files | grep -q auditd; then
-    sudo systemctl enable auditd
+if systemctl list-unit-files 2>/dev/null | grep -q '^auditd\.service'; then
+    sudo systemctl enable auditd 2>/dev/null || log "Warning: Failed to enable auditd service"
 fi
 
 # CIS 4.1.3 - Ensure auditing for processes that start prior to auditd is enabled
