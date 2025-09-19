@@ -5,8 +5,6 @@
 # Excludes SSH and Active Directory domain joining controls
 # Run as root or with sudo
 
-set -e
-
 # Function to log actions
 log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
@@ -92,7 +90,9 @@ fi
 
 # CIS 1.1.3 - Ensure gpgcheck is globally activated
 log "Enabling gpgcheck globally"
-sed -i 's/^gpgcheck\s*=.*/gpgcheck=1/' /etc/dnf/dnf.conf
+if [ -f /etc/dnf/dnf.conf ]; then
+    sed -i 's/^gpgcheck\s*=.*/gpgcheck=1/' /etc/dnf/dnf.conf
+fi
 
 # CIS 1.1.4 - Ensure AIDE is installed
 log "Installing AIDE"
