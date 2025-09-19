@@ -98,10 +98,10 @@ fi
 log "Installing AIDE"
 if command -v dnf > /dev/null; then
     sudo dnf install -y aide
-    if command -v aide > /dev/null; then
-        sudo aide --init
-        sudo mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
-    fi
+fi
+if command -v aide > /dev/null; then
+    sudo aide --init
+    sudo mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
 fi
 
 # CIS 1.1.5 - Ensure filesystem integrity is regularly checked
@@ -110,17 +110,21 @@ sudo sh -c 'echo "0 5 * * * root /usr/sbin/aide --check" >> /etc/crontab'
 
 # CIS 1.2.1 - Ensure package manager repositories are configured
 log "Configuring package manager repositories"
-sudo dnf config-manager --set-enabled rhui-client-config-server-9
+if command -v dnf > /dev/null; then
+    sudo dnf config-manager --set-enabled rhui-client-config-server-9
+fi
 
 # CIS 1.2.2 - Ensure GPG keys are configured
 log "Configuring GPG keys"
-if command -v rpm > /dev/null; then
+if command -v rpm > /dev/null && [ -f /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release ]; then
     sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 fi
 
 # CIS 1.3.1 - Ensure sudo is installed
 log "Ensuring sudo is installed"
-sudo dnf install -y sudo
+if command -v dnf > /dev/null; then
+    sudo dnf install -y sudo
+fi
 
 # CIS 1.3.2 - Ensure sudo commands use pty
 log "Configuring sudo to use pty"
@@ -147,11 +151,15 @@ sudo sysctl -p
 
 # CIS 1.5.3 - Ensure prelink is disabled
 log "Disabling prelink"
-sudo dnf remove -y prelink
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y prelink
+fi
 
 # CIS 1.6.1 - Ensure SELinux is installed
 log "Ensuring SELinux is installed"
-sudo dnf install -y libselinux
+if command -v dnf > /dev/null; then
+    sudo dnf install -y libselinux
+fi
 
 # CIS 1.6.2 - Ensure SELinux is not disabled in bootloader configuration
 log "Configuring SELinux in bootloader"
@@ -195,7 +203,9 @@ sudo chmod 644 /etc/issue.net
 
 # CIS 1.8.1 - Ensure GNOME Display Manager is removed
 log "Removing GNOME Display Manager"
-sudo dnf remove -y gdm
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y gdm
+fi
 
 # CIS 1.8.2 - Ensure GDM login banner is configured
 log "Configuring GDM login banner"
@@ -203,8 +213,10 @@ log "Configuring GDM login banner"
 
 # CIS 1.9.1 - Ensure updates, patches, and additional security software are installed
 log "Installing updates and security software"
-sudo dnf update -y
-sudo dnf install -y yum-utils
+if command -v dnf > /dev/null; then
+    sudo dnf update -y
+    sudo dnf install -y yum-utils
+fi
 
 # CIS 1.9.2 - Ensure Red Hat Subscription Manager connection is configured
 log "Configuring Red Hat Subscription Manager"
@@ -227,8 +239,10 @@ log "Configuring time synchronization"
 if command -v dnf > /dev/null; then
     sudo dnf install -y chrony
 fi
-sudo systemctl enable chronyd
-sudo systemctl start chronyd
+if systemctl list-unit-files | grep -q chronyd; then
+    sudo systemctl enable chronyd
+    sudo systemctl start chronyd
+fi
 
 # CIS 2.1.2 - Ensure chrony is configured
 log "Configuring chrony"
@@ -237,11 +251,15 @@ sudo systemctl restart chronyd
 
 # CIS 2.2.1 - Ensure xinetd is not installed
 log "Removing xinetd"
-sudo dnf remove -y xinetd
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y xinetd
+fi
 
 # CIS 2.2.2 - Ensure openbsd-inetd is not installed
 log "Removing openbsd-inetd"
-sudo dnf remove -y openbsd-inetd
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y openbsd-inetd
+fi
 
 # CIS 2.2.3 - Ensure time synchronization is in use (already done)
 
@@ -249,61 +267,89 @@ sudo dnf remove -y openbsd-inetd
 
 # CIS 2.2.5 - Ensure ntp is not installed
 log "Removing ntp"
-sudo dnf remove -y ntp
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y ntp
+fi
 
 # CIS 2.2.6 - Ensure chrony is not installed (wait, we installed it above, but CIS says ensure it's configured properly)
 
 # CIS 2.3.1 - Ensure Avahi Server is not installed
 log "Removing Avahi Server"
-sudo dnf remove -y avahi
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y avahi
+fi
 
 # CIS 2.3.2 - Ensure CUPS is not installed
 log "Removing CUPS"
-sudo dnf remove -y cups
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y cups
+fi
 
 # CIS 2.3.3 - Ensure DHCP Server is not installed
 log "Removing DHCP Server"
-sudo dnf remove -y dhcp-server
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y dhcp-server
+fi
 
 # CIS 2.3.4 - Ensure LDAP server is not installed
 log "Removing LDAP server"
-sudo dnf remove -y openldap-servers
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y openldap-servers
+fi
 
 # CIS 2.3.5 - Ensure NFS is not installed
 log "Removing NFS"
-sudo dnf remove -y nfs-utils
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y nfs-utils
+fi
 
 # CIS 2.3.6 - Ensure DNS server is not installed
 log "Removing DNS server"
-sudo dnf remove -y bind
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y bind
+fi
 
 # CIS 2.3.7 - Ensure FTP server is not installed
 log "Removing FTP server"
-sudo dnf remove -y vsftpd
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y vsftpd
+fi
 
 # CIS 2.3.8 - Ensure HTTP server is not installed
 log "Removing HTTP server"
-sudo dnf remove -y httpd
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y httpd
+fi
 
 # CIS 2.3.9 - Ensure IMAP and POP3 server is not installed
 log "Removing IMAP and POP3 server"
-sudo dnf remove -y dovecot
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y dovecot
+fi
 
 # CIS 2.3.10 - Ensure Samba is not installed
 log "Removing Samba"
-sudo dnf remove -y samba
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y samba
+fi
 
 # CIS 2.3.11 - Ensure HTTP Proxy Server is not installed
 log "Removing HTTP Proxy Server"
-sudo dnf remove -y squid
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y squid
+fi
 
 # CIS 2.3.12 - Ensure net-snmp is not installed
 log "Removing net-snmp"
-sudo dnf remove -y net-snmp
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y net-snmp
+fi
 
 # CIS 2.3.13 - Ensure NIS server is not installed
 log "Removing NIS server"
-sudo dnf remove -y ypserv
+if command -v dnf > /dev/null; then
+    sudo dnf remove -y ypserv
+fi
 
 # CIS 3.1.1 - Ensure IP forwarding is disabled
 log "Disabling IP forwarding"
@@ -382,7 +428,9 @@ sudo sysctl -p
 
 # CIS 3.4.1 - Ensure TCP Wrappers is installed
 log "Installing TCP Wrappers"
-sudo dnf install -y tcp_wrappers
+if command -v dnf > /dev/null; then
+    sudo dnf install -y tcp_wrappers
+fi
 
 # CIS 3.4.2 - Ensure /etc/hosts.allow is configured
 log "Configuring /etc/hosts.allow"
@@ -408,7 +456,9 @@ fi
 
 # CIS 4.1.2 - Ensure auditd service is enabled
 log "Enabling auditd service"
-sudo systemctl enable auditd
+if systemctl list-unit-files | grep -q auditd; then
+    sudo systemctl enable auditd
+fi
 
 # CIS 4.1.3 - Ensure auditing for processes that start prior to auditd is enabled
 log "Enabling auditing for processes prior to auditd"
